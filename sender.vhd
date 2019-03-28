@@ -2,7 +2,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 entity sender is
-port (clk, clk_en, rst, ready, btn: in std_logic;
+port (clk, clk_en, rst, rdy, btn: in std_logic;
       char: out std_logic_vector(7 downto 0);
       send: out std_logic);
       
@@ -21,15 +21,15 @@ signal send_state : state := idle;
 begin
     process(clk)
     begin
-        if(rising_edge(clk)) then
+        if(rising_edge(clk) and en = '1') then
             if(rst = '1') then
                 i <= (others => '0');
                 char <= (others => '0');
                 send_state <= idle;
-            if(clk_en = '1') then
+            else
                     case send_state is
                     when idle => 
-                        if (ready = '1' and btn = '1') then
+                        if (rdy = '1' and btn = '1') then
                             if(unsigned(i) < 5) then
                                 send <= '1';
                                 char <= word(to_integer(unsigned(i)));
@@ -48,7 +48,7 @@ begin
                         send_state <= BusyC;
                         
                     when busyC =>
-                        if(ready = '1' and btn = '0') then
+                        if(rdy = '1' and btn = '0') then
                             send_state <= idle;
                         else
                             send_state <= BusyC;
@@ -56,6 +56,5 @@ begin
                     end case;
                 end if;    
             end if;
-        end if;
     end process;        
 end behavioral;
